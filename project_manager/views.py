@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from django.contrib.auth.models import User
 
@@ -16,24 +17,30 @@ from django.contrib.auth.models import User
 def index(request):
     return render(request, 'index.html')
 
+
 def login_view(request):
     if request.method == "POST":
 
         # Attempt to sign user in
-        username = request.POST["username"]
-        password = request.POST["password"]
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
         user = authenticate(request, username=username, password=password)
 
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return JsonResponse({
+                "message": 'You are logged in'
+            })
         else:
-            return render(request, "project_manager/login.html", {
-                "message": "Invalid username and/or password."
+            return JsonResponse({
+                "message": 'Invalid username or password'
             })
     else:
-        return render(request, "project_manager/login.html")
+        return JsonResponse({
+            "error": "Post needed"
+        })
 
 
 def logout_view(request):
