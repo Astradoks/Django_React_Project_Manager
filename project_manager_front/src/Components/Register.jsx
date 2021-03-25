@@ -5,48 +5,48 @@ import { Link, Redirect } from "react-router-dom";
 
 const csrftoken = Cookies.get('csrftoken');
 
-async function login(username, password) {
-  return fetch('/login', {
+async function register(username, email, password, confirmation) {
+  return fetch('/register', {
     method: 'POST',
     headers: {
       'X-CSRFToken': csrftoken
     },
     body: JSON.stringify({
       username: username,
-      password: password
+      email: email,
+      password: password,
+      confirmation: confirmation
     })
   })
   .then(response => response.json())
 }
 
-export default function Login() {
+export default function Register() {
   const [username, setUsername] = useState();
+  const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+  const [confirmation, setConfirmation] = useState();
   const [message, setMessage] = useState('');
-  const [loggedUser, setLoggedUser] = useState();
 
   const handleSubmit = async e => {
       e.preventDefault();
-      const data = await login(username, password);
-      setMessage(data.message);
-      setLoggedUser(data.username);
+      const msg = await register(username, email, password, confirmation);
+      setMessage(msg.message);
   }
 
-  if (message === "LoggedIn"){
-    sessionStorage.setItem('loggedUser', loggedUser);
-    window.location.reload();
+  if (message === "UserCreated"){
     return <Redirect to="/" />
   }
 
   return(
     <div className="container text-center">
       <br/>
-      <h1>Log In</h1>
+      <h1>Register</h1>
       <br/><br/>
       <div className="row justify-content-center">
         <div className="col-md-6 col-sm-12 shadow p-3 bg-white rounded">
           { message !== '' &&
-            <div className="alert alert-danger">
+            <div className="alert alert-info">
                 <strong>{message}</strong>
             </div>
           }
@@ -54,16 +54,20 @@ export default function Login() {
             <CSRFToken />
             <input type="text" className="form-control" placeholder="Username" required onChange={e => setUsername(e.target.value)}/>
             <br/>
+            <input type="email" className="form-control" placeholder="Email" required onChange={e => setEmail(e.target.value)}/>
+            <br/>
             <input type="password" className="form-control" placeholder="Password" required onChange={e => setPassword(e.target.value)}/>
             <br/>
+            <input type="password" className="form-control" placeholder="Confirmation" required onChange={e => setConfirmation(e.target.value)}/>
+            <br/>
             <div>
-              <button type="submit" className="btn btn-outline-primary">Login</button>
+              <button type="submit" className="btn btn-outline-primary">Register</button>
             </div>
           </form>
         </div>
       </div>
       <br/><br/>
-      Don't have an account? <Link to="/register">Register here.</Link>
+      Already have an account? <Link to="/login">Log In here.</Link>
     </div>
   )
 }
