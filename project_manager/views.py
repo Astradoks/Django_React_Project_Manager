@@ -1,10 +1,8 @@
 import json
 import datetime
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import JsonResponse
-from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -13,11 +11,7 @@ from django.contrib.auth.models import User
 
 # Create your views here.
 
-@login_required(login_url="login")
-def index(request):
-    return render(request, 'index.html')
-
-
+@ensure_csrf_cookie
 def login_view(request):
     if request.method == "POST":
 
@@ -31,7 +25,8 @@ def login_view(request):
         if user is not None:
             login(request, user)
             return JsonResponse({
-                "message": 'You are logged in'
+                "message": 'LoggedIn',
+                "username": username
             })
         else:
             return JsonResponse({
@@ -45,20 +40,24 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return JsonResponse({
+        "message": 'You are logged out'
+    })
 
 
+@ensure_csrf_cookie
 def register(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        email = request.POST["email"]
+        data = json.loads(request.body)
+        username = data.get('username')
+        email = data.get('email')
 
         # Ensure password matches confirmation
-        password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
+        password = data.get('password')
+        confirmation = data.get('confirmation')
         if password != confirmation:
-            return render(request, "project_manager/register.html", {
-                "message": "Passwords must match."
+            return JsonResponse({
+                "message": 'Password must match'
             })
 
         # Attempt to create new user
@@ -66,10 +65,13 @@ def register(request):
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
-            return render(request, "project_manager/register.html", {
-                "message": "Username already taken."
+            return JsonResponse({
+                "message": 'Username already taken'
             })
-        login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+        return JsonResponse({
+            "message": 'UserCreated'
+        })
     else:
-        return render(request, "project_manager/register.html")
+        return JsonResponse({
+            "error": "Post needed"
+        })
