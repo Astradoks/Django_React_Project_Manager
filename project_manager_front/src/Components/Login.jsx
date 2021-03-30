@@ -3,8 +3,10 @@ import CSRFToken from './csrftoken';
 import Cookies from 'js-cookie';
 import { Link, Redirect } from "react-router-dom";
 
+// Get the csrf_token so that post can be made 
 const csrftoken = Cookies.get('csrftoken');
 
+// Login function that post to login url and return a message from the backend
 async function login(username, password) {
   return fetch('/login', {
     method: 'POST',
@@ -23,17 +25,17 @@ export default function Login() {
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
   const [message, setMessage] = useState('');
-  const [loggedUser, setLoggedUser] = useState();
 
+  // Calls the login function and set the message from the backend
   const handleSubmit = async e => {
       e.preventDefault();
       const data = await login(username, password);
       setMessage(data.message);
-      setLoggedUser(data.username);
   }
 
+  // Depending of the message redirect to index or stay in login
   if (message === "LoggedIn"){
-    sessionStorage.setItem('loggedUser', loggedUser);
+    sessionStorage.setItem('loggedUser', username);
     window.location.reload();
     return <Redirect to="/" />
   }

@@ -3,8 +3,10 @@ import CSRFToken from './csrftoken';
 import Cookies from 'js-cookie';
 import { Link, Redirect } from "react-router-dom";
 
+// Get the csrf_token so that post can be made 
 const csrftoken = Cookies.get('csrftoken');
 
+// Register function that post to register url and return a message from the backend
 async function register(username, email, password, confirmation) {
   return fetch('/register', {
     method: 'POST',
@@ -28,14 +30,16 @@ export default function Register() {
   const [confirmation, setConfirmation] = useState();
   const [message, setMessage] = useState('');
 
+  // Calls the register function and set the message from the backend
   const handleSubmit = async e => {
       e.preventDefault();
       const msg = await register(username, email, password, confirmation);
       setMessage(msg.message);
   }
 
+  // Depending of the message redirect to login or stay in register
   if (message === "UserCreated"){
-    return <Redirect to="/" />
+    return <Redirect to="/login" />
   }
 
   return(

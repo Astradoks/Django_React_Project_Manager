@@ -1,7 +1,7 @@
 import React from 'react';
 import Login from './Login';
 import Register from './Register';
-import Projects from './Projects';
+import Index from './Index';
 import {
   BrowserRouter as Router,
   Switch,
@@ -10,6 +10,7 @@ import {
 
 export default function ProjectManager() {
 
+  // If user is not logged in only login and register are allowed 
   if (!sessionStorage.getItem('loggedUser')) {
     return (
       <div>
@@ -30,18 +31,13 @@ export default function ProjectManager() {
     )
   }
 
+  // If user is logged in only index is allowed 
   return (
     <div>
       <Router>
         <Switch>
-          <Route path="/login">
-            <Login />
-          </Route>
-          <Route path="/register">
-            <Register />
-          </Route>
           <Route exact path="/">
-            <Projects />
+            <Index />
           </Route>
         </Switch>
       </Router>

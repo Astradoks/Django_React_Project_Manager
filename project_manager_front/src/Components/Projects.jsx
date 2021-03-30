@@ -1,42 +1,98 @@
 import React, { useState } from 'react';
-import { Link, Redirect } from "react-router-dom";
+import CSRFToken from './csrftoken';
+import Cookies from 'js-cookie';
 
-async function logout() {
-    fetch('/logout')
-    .then(response => response.json());
+// Get the csrf_token so that post can be made 
+const csrftoken = Cookies.get('csrftoken');
+
+// Login function that post to create_project url and return a message from the backend
+async function create_project(name, description, category) {
+    return fetch('/create_project', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+          name: name,
+          description: description,
+          category: category
+        })
+      })
+      .then(response => response.json());
 }
 
-export default function Projects(){
+export default function Projects(props){
 
-    const [username, setUsername] = useState(sessionStorage.getItem("loggedUser"));
+    const [projectForm, setProjectForm] = useState(false);
+    const [name, setName] = useState();
+    const [description, setDescription] = useState();
+    const [category, setCategory] = useState();
 
-    const logoutHandler = async () => {
-        await logout();
-        sessionStorage.removeItem("loggedUser");
-        setUsername('');
-        return <Redirect to="/login" />
+    // Calls the create_project function and set projectId and page to render the page of the new project
+    const handleCreateProject = async e => {
+        e.preventDefault();
+        const data = await create_project(name, description, category);
+        setProjectForm(false);
+        console.log(data.message);
+        console.log(data.id);
+        props.setProjectId(data.id);
+        props.setPage('project');
     }
 
     return (
         <div>
-            <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                <div className="container-fluid">
-                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
-                    <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
-                        <Link className="navbar-brand" to="/">{username}</Link>
-                        <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li className="nav-item">
-                                <Link className="nav-link active" to="/login" onClick={logoutHandler}>Logout</Link>
-                            </li>
-                        </ul>
+            <h1>Projects</h1>
+            <br/><br/>
+            <div className="row">
+                {/* Map all the projects from this user and render them */}
+                {props.projects.map(project => (
+                    <div key={project.id} id={project.id} className="col-lg-3 col-md-4">
+                        <div className="d-grid gap-2">
+                            <button className="btn" onClick={() => {
+                                    props.setPage('project');
+                                    props.setProjectId(project.id);
+                                }}>
+                                <div className="card-body shadow p-4 bg-white rounded">
+                                    <h5 className="card-title">{project.name}</h5>
+                                    <p className="card-text">{project.description}</p>
+                                    <p className="card-text fw-light">Category: {project.category}</p>
+                                    <p className="fw-light fst-italic">{project.creation_date}</p>
+                                </div>
+                            </button>
+                        </div>
+                        <br/>
                     </div>
+                ))}
+                <div className="col-md-3">
+                    {/* Ask if it is needed to render a button to display the form or to render the form to add a project */}
+                    {projectForm ?
+                        /* Render form to add project */
+                        <div className="card-body shadow p-4 bg-light rounded">
+                            <form onSubmit={handleCreateProject}>
+                                <CSRFToken />
+                                <input type="text" className="form-control" placeholder="Name" required onChange={e => setName(e.target.value)}/>
+                                <br/>
+                                <textarea rows="5" className="form-control" placeholder="Description" required onChange={e => setDescription(e.target.value)}></textarea>
+                                <br/>
+                                <input type="text" className="form-control" placeholder="Category" required onChange={e => setCategory(e.target.value)}/>
+                                <br/>
+                                <div className="d-grid gap-2">
+                                    <input type="submit" className="btn btn-outline-primary" value="Create Project"/>
+                                </div>
+                            </form>
+                        </div>
+                        :
+                        /* Render button to display form */
+                        <div className="d-grid gap-2">
+                            <button className="btn" onClick={() => setProjectForm(true)}>
+                                <div className="card-body shadow-sm p-4 bg-light rounded d-flex">
+                                    <p className="fs-1 m-3">+</p>
+                                    <p className="fs-5 m-3">Click here to add a new project!</p>
+                                </div>
+                            </button>
+                        </div>
+                    }
                 </div>
-            </nav>
-            <div className="container">
-                <br/>
-                <h1>Projects</h1>
             </div>
         </div>
     )
