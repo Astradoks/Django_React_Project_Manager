@@ -247,3 +247,79 @@ def change_task_column(request):
         return JsonResponse({
             "error": "Login needed"
         })
+
+
+# Edit Task
+@ensure_csrf_cookie
+def edit_task(request):
+
+    # Ensure user is logged in
+    if request.user.is_authenticated:
+
+        # Ensure the method is PUT
+        if request.method == 'PUT':
+
+            # Get all data
+            data = json.loads(request.body)
+            task_id = data.get('task_id')
+            task = Task.objects.get(id=task_id)
+            new_name = data.get('new_name')
+            new_description = data.get('new_description')
+            new_color = data.get('new_color')
+
+            # Try to edit task
+            try:
+                task.name = new_name
+                task.description = new_description
+                task.color = new_color
+                task.save()
+            except:
+                return JsonResponse({
+                    "error": "There was an error editing this task"
+                })
+            return JsonResponse({
+                "message": "TaskEdited"
+            })
+        else:
+            return JsonResponse({
+                "error": "Put needed"
+            })
+    else:
+        return JsonResponse({
+            "error": "Login needed"
+        })
+
+
+# Delete Task
+@ensure_csrf_cookie
+def delete_task(request):
+
+    # Ensure user is logged in
+    if request.user.is_authenticated:
+
+        # Ensure the method is DELETE
+        if request.method == 'DELETE':
+
+            # Get all data
+            data = json.loads(request.body)
+            task_id = data.get('task_id')
+            task = Task.objects.get(id=task_id)
+
+            # Try to edit task
+            try:
+                task.delete()
+            except:
+                return JsonResponse({
+                    "error": "There was an error deleting this task"
+                })
+            return JsonResponse({
+                "message": "TaskDeleted"
+            })
+        else:
+            return JsonResponse({
+                "error": "Delete needed"
+            })
+    else:
+        return JsonResponse({
+            "error": "Login needed"
+        })
