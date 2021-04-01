@@ -36,6 +36,21 @@ async function create_task(column_id, name, description, color) {
       .then(response => response.json());
 }
 
+// Fetch change task to another column
+async function change_task_column(column_id, task_id) {
+    return fetch('/change_task_column', {
+        method: 'PUT',
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            column_id: column_id,
+            task_id: task_id
+        })
+      })
+      .then(response => response.json());
+}
+
 export default function Project(props){
 
     // Display project information
@@ -53,6 +68,11 @@ export default function Project(props){
     const [taskName, setTaskName] = useState();
     const [taskDescription, setTaskDescription] = useState();
     const [taskColor, setTaskColor] = useState();
+    // Change task to another column
+    const [newColumnTask, setNewColumnTask] = useState();
+    const [taskId, setTaskId] = useState();
+    // Render task change form
+    const [changeTaskColumnForm, setChangeTaskColumnForm] = useState();
 
     // Needed to get all projects
     useEffect(() => {
@@ -107,6 +127,15 @@ export default function Project(props){
         setTaskForm(true);
     }
 
+    // Change task to another column
+    const handleChangeTask = async e => {
+        e.preventDefault();
+        const data = await change_task_column(newColumnTask, taskId);
+        console.log(data);
+        props.setPage('projects');
+        props.setPage('project');
+    }
+
     return (
         <div>
             <h1>{projectName}</h1>
@@ -114,16 +143,37 @@ export default function Project(props){
             <div className="row">
                 {/* Map all the columns from the project and render them */}
                 {projectColumns.map(column => (
-                    <div key={column.id} id={column.id} className={`col-lg-${columnNum}`}>
+                    <div key={column.id} id={column.id} className={`col-lg-${columnNum}`} onMouseLeave={() => setChangeTaskColumnForm('')}>
                         <div className="card-body shadow p-4 bg-white rounded">
                             <h5 className="card-title">{column.name}</h5>
                             <br/>
                             {/* Map all tasks in this column and render them */}
                             {column.tasks.map(task => (
-                                <div key={task.id} id={task.id} className={`card border-${task.color} card-body mb-3`}>
+                                <div key={task.id} id={task.id} className={`card border-${task.color} card-body mb-3`} onMouseEnter={() => setChangeTaskColumnForm(task.id)} >
                                     <h6 className="card-title">{task.name}</h6>
                                     <p className="card-text fw-light">{task.description}</p>
                                     <p className="fw-light fst-italic">{task.creation_date}</p>
+                                    {/* Show change task to another column form */}
+                                    { changeTaskColumnForm === task.id && 
+                                        <form onSubmit={handleChangeTask}>
+                                            <CSRFToken />
+                                            <div className="row">
+                                                {/* Map all column names to show buttons */}
+                                                {projectColumns.map(col => (
+                                                    // Only show buttons that move task to other columns
+                                                    column.id !== col.id &&
+                                                        <div className="col-auto mb-2">
+                                                            <div className="d-grid gap-2">
+                                                                <button type="submit" className="btn btn-outline-primary" onClick={() => {
+                                                                    setNewColumnTask(col.id);
+                                                                    setTaskId(task.id);
+                                                                }}>{col.name}</button>
+                                                            </div>
+                                                        </div>
+                                                ))}
+                                            </div>
+                                        </form>
+                                    }
                                 </div>
                             ))}
                             {/* Ask if it is needed to render a button to display the form or to render the form to add a task */}

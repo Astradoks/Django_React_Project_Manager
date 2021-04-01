@@ -209,3 +209,41 @@ def create_task(request):
         return JsonResponse({
             "error": "Login needed"
         })
+
+
+# Change task to another column
+@ensure_csrf_cookie
+def change_task_column(request):
+
+    # Ensure user is logged in
+    if request.user.is_authenticated:
+
+        # Ensure the method is PUT
+        if request.method == 'PUT':
+
+            # Get all data
+            data = json.loads(request.body)
+            column_id = data.get('column_id')
+            column = Column.objects.get(id=column_id)
+            task_id = data.get('task_id')
+            task = Task.objects.get(id=task_id)
+
+            # Try to change task to another column
+            try:
+                task.column = column
+                task.save()
+            except:
+                return JsonResponse({
+                    "error": "There was an error changing this task to another column"
+                })
+            return JsonResponse({
+                "message": "TaskChanged"
+            })
+        else:
+            return JsonResponse({
+                "error": "Put needed"
+            })
+    else:
+        return JsonResponse({
+            "error": "Login needed"
+        })
