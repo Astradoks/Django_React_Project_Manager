@@ -82,9 +82,69 @@ async function delete_task(task_id) {
       .then(response => response.json());
 }
 
+// Fetch edit column
+async function edit_column(column_id, new_name) {
+    return fetch('/edit_column', {
+        method: 'PUT',
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            column_id: column_id,
+            new_name: new_name
+        })
+      })
+      .then(response => response.json());
+}
+
+// Fetch delete column
+async function delete_column(column_id) {
+    return fetch('/delete_column', {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            column_id: column_id
+        })
+      })
+      .then(response => response.json());
+}
+
+// Fetch edit project
+async function edit_project(project_id, new_name, new_description) {
+    return fetch('/edit_project', {
+        method: 'PUT',
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            project_id: project_id,
+            new_name: new_name,
+            new_description: new_description
+        })
+      })
+      .then(response => response.json());
+}
+
+// Fetch delete project
+async function delete_project(project_id) {
+    return fetch('/delete_project', {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            project_id: project_id
+        })
+      })
+      .then(response => response.json());
+}
+
 export default function Project(props){
 
     // Display project information
+    const [projectId, setProjectId] = useState();
     const [projectName, setProjectName] = useState();
     const [projectDescription, setProjectDescription] = useState();
     const [projectColumns, setProjectColumns] = useState([]);
@@ -101,14 +161,22 @@ export default function Project(props){
     const [taskColor, setTaskColor] = useState();
     // Change task to another column
     const [newColumnTask, setNewColumnTask] = useState();
-    // Render task change form and edit task form
-    // This saves the task id
+    // Render task change form and edit task form (This saves the task id)
     const [changeTaskColumnForm, setChangeTaskColumnForm] = useState();
     // New values to edit task
     const [newTaskName, setNewTaskName] = useState();
     const [newTaskDescription, setNewTaskDescription] = useState();
     const [newTaskColor, setNewTaskColor] = useState();
-    // Let delete task
+    // Render form to edit column (This saves the column id)
+    const [editColumnForm, setEditColumnForm] = useState('');
+    // New values to edit column
+    const [newColumnName, setNewColumnName] = useState();
+    // Render form to edit project
+    const [editProjectForm, setEditProjectForm] = useState();
+    // New values to edit project
+    const [newProjectName, setNewProjectName] = useState();
+    const [newProjectDescription, setNewProjectDescription] = useState();
+    // Delete tasks, columns or projects
     const [checked, setChecked] = useState(false);
 
     // Needed to get all projects
@@ -116,17 +184,11 @@ export default function Project(props){
         fetchProject();
     }, [])
 
-    // Reload the information of the page with new changes
-    function reload(data) {
-        console.log(data);
-        props.setPage('projects');
-        props.setPage('project');
-    }
-
     const fetchProject = async () => {
         const id = props.id;
         const response = await fetch(`/project/${id}`);
         const data = await response.json();
+        setProjectId(data.project.id);
         setProjectName(data.project.name);
         setProjectDescription(data.project.description);
         setProjectColumns(data.columns);
@@ -144,6 +206,13 @@ export default function Project(props){
         }
     }
 
+    // Reload the information of the page with new changes
+    function reload(data) {
+        console.log(data);
+        props.setPage('projects');
+        props.setPage('project');
+    }
+
     // Create a new column in this project
     const handleCreateColumn = async e => {
         e.preventDefault();
@@ -158,12 +227,6 @@ export default function Project(props){
         const data = await create_task(taskColumn, taskName, taskDescription, taskColor);
         setTaskForm(false);
         reload(data);
-    }
-
-    // Display form to create task in the correct column
-    function displayTaskForm(column_id) {
-        setTaskColumn(column_id);
-        setTaskForm(true);
     }
 
     // Change task to another column
@@ -187,10 +250,90 @@ export default function Project(props){
         reload(data);
     }
 
+    // Edit Column
+    const handleEditColumn = async e => {
+        e.preventDefault();
+        const data = await edit_column(editColumnForm, newColumnName);
+        reload(data);
+    }
+
+    // Delete Column
+    const handleDeleteColumn = async e => {
+        e.preventDefault();
+        const data = await delete_column(editColumnForm);
+        reload(data);
+    }
+
+    // Edit Project
+    const handleEditProject = async e => {
+        e.preventDefault();
+        const data = await edit_project(projectId, newProjectName, newProjectDescription);
+        reload(data);
+    }
+
+    // Delete Project
+    const handleDeleteProject = async e => {
+        e.preventDefault();
+        const data = await delete_project(projectId);
+        window.location.reload();
+    }
+
     return (
         <div>
-            <h1>{projectName}</h1>
-            <p className="fs-4 m-3">{projectDescription}</p>
+            {/* Render form to edit project */}
+            { editProjectForm ?
+                // Change const to render again the title and description when mouse goes out
+                <div onMouseLeave={() => {
+                        setEditProjectForm(false);
+                        setChecked('');
+                    }}>
+                    <form onSubmit={handleEditProject}>
+                        <CSRFToken />
+                        <div className="row">
+                            <div className="col-lg-3">
+                                <input type="text" className="form-control mb-2" required value={newProjectName} onChange={e => setNewProjectName(e.target.value)} />
+                            </div>
+                            <div className="col-lg-6">
+                                <textarea rows="4" className="form-control mb-2" required value={newProjectDescription} onChange={e => setNewProjectDescription(e.target.value)}></textarea>
+                            </div>
+                            <div className="col-lg-3">
+                                <div className="d-grid gap-2">
+                                    <input type="submit" className="btn btn-outline-warning mb-3" value="Edit" />
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6">
+                                        <div className="form-check m-2 text-center">
+                                            <input className="form-check-input" type="checkbox" id="delete_project" onChange={(e) => setChecked(e.target.checked)} />
+                                            <label htmlFor="delete_project">Check to delete Project</label>
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6">
+                                        <div className="d-grid gap-2">
+                                            {/* Ask if it is possible to delete the project */}
+                                            { checked ?
+                                                <button className="btn btn-outline-danger" onClick={handleDeleteProject} >Delete</button>
+                                                :
+                                                <button className="btn btn-outline-danger" onClick={handleDeleteProject} disabled>Delete</button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <br/>
+                </div>
+                :
+                // Show forms to edit and delete project on mouse enter
+                <div onMouseEnter={() => {
+                    setNewProjectName(projectName);
+                    setNewProjectDescription(projectDescription);
+                    setEditProjectForm(true);
+                    }} >
+                    <h1>{projectName}</h1>
+                    <p className="fs-4 m-3">{projectDescription}</p>
+                </div>
+            }
             <div className="row">
                 {/* Map all the columns from the project and render them */}
                 {projectColumns.map(column => (
@@ -200,7 +343,50 @@ export default function Project(props){
                         setChecked('');
                     }}>
                         <div className="card-body shadow p-4 bg-white rounded">
-                            <h5 className="card-title">{column.name}</h5>
+                            {/* Render form to edit and delete each column */}
+                            { editColumnForm === column.id?
+                                <div onMouseLeave={() => {
+                                    setEditColumnForm('');
+                                    setChecked('');
+                                }}>
+                                    <form onSubmit={handleEditColumn}>
+                                        <CSRFToken />
+                                        <input type="text" className="form-control" required value={newColumnName} onChange={e => setNewColumnName(e.target.value)} />
+                                        <br/>
+                                        <div className="d-grid gap-2">
+                                            <input type="submit" className="btn btn-outline-warning" value="Edit" />
+                                        </div>
+                                    </form>
+                                    <div className="row">
+                                        <div className="col-lg-6">
+                                            <div className="form-check m-2 text-center">
+                                                <input className="form-check-input" type="checkbox" id="delete_project" onChange={(e) => setChecked(e.target.checked)} />
+                                                <label htmlFor="delete_project">Check to delete Column</label>
+                                            </div>
+                                        </div>
+                                        <div className="col-lg-6">
+                                            <div className="d-grid gap-2">
+                                                {/* Ask if it is possible to delete the column */}
+                                                { checked ?
+                                                    <button className="btn btn-outline-danger mt-3" onClick={handleDeleteColumn} >Delete</button>
+                                                    :
+                                                    <button className="btn btn-outline-danger mt-3" onClick={handleDeleteColumn} disabled>Delete</button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                :
+                                // Hide other forms
+                                <div onMouseEnter={() => {
+                                    setNewColumnName(column.name);
+                                    setEditColumnForm(column.id);
+                                    setChangeTaskColumnForm('');
+                                    setChecked('');
+                                }}>
+                                    <h5 className="card-title">{column.name}</h5>
+                                </div>
+                            }
                             <br/>
                             {/* Map all tasks in this column and render them */}
                             {column.tasks.map(task => (
@@ -318,7 +504,10 @@ export default function Project(props){
                                 :
                                 /* Render button to display the form */
                                 <div className="d-grid gap-2">
-                                    <button className="btn" onClick={() => displayTaskForm(column.id)}>
+                                    <button className="btn" onClick={() => {
+                                        setTaskColumn(column.id);
+                                        setTaskForm(true);
+                                    }}>
                                         <div className="card-body shadow-sm p-4 bg-light rounded text-center">
                                             <p className="fs-6 m-1">Add new Task</p>
                                         </div>

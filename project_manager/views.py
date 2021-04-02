@@ -305,7 +305,7 @@ def delete_task(request):
             task_id = data.get('task_id')
             task = Task.objects.get(id=task_id)
 
-            # Try to edit task
+            # Try to delete task
             try:
                 task.delete()
             except:
@@ -314,6 +314,152 @@ def delete_task(request):
                 })
             return JsonResponse({
                 "message": "TaskDeleted"
+            })
+        else:
+            return JsonResponse({
+                "error": "Delete needed"
+            })
+    else:
+        return JsonResponse({
+            "error": "Login needed"
+        })
+
+
+# Edit Column
+@ensure_csrf_cookie
+def edit_column(request):
+
+    # Ensure user is logged in
+    if request.user.is_authenticated:
+
+        # Ensure the method is PUT
+        if request.method == 'PUT':
+
+            # Get all data
+            data = json.loads(request.body)
+            column_id = data.get('column_id')
+            column = Column.objects.get(id=column_id)
+            new_name = data.get('new_name')
+
+            # Try to edit column
+            try:
+                column.name = new_name
+                column.save()
+            except:
+                return JsonResponse({
+                    "error": "There was an error editing this column"
+                })
+            return JsonResponse({
+                "message": "ColumnEdited"
+            })
+        else:
+            return JsonResponse({
+                "error": "Put needed"
+            })
+    else:
+        return JsonResponse({
+            "error": "Login needed"
+        })
+
+
+# Delete Column
+@ensure_csrf_cookie
+def delete_column(request):
+
+    # Ensure user is logged in
+    if request.user.is_authenticated:
+
+        # Ensure the method is DELETE
+        if request.method == 'DELETE':
+
+            # Get all data
+            data = json.loads(request.body)
+            column_id = data.get('column_id')
+            column = Column.objects.get(id=column_id)
+
+            # Try to delete column
+            try:
+                column.delete()
+            except:
+                return JsonResponse({
+                    "error": "There was an error deleting this column"
+                })
+            return JsonResponse({
+                "message": "ColumnDeleted"
+            })
+        else:
+            return JsonResponse({
+                "error": "Delete needed"
+            })
+    else:
+        return JsonResponse({
+            "error": "Login needed"
+        })
+
+
+# Edit Project
+@ensure_csrf_cookie
+def edit_project(request):
+
+    # Ensure user is logged in
+    if request.user.is_authenticated:
+
+        # Ensure the method is PUT
+        if request.method == 'PUT':
+
+            # Get all data
+            data = json.loads(request.body)
+            project_id = data.get('project_id')
+            project = Project.objects.get(id=project_id)
+            new_name = data.get('new_name')
+            new_description = data.get('new_description')
+
+            # Try to edit project
+            try:
+                project.name = new_name
+                project.description = new_description
+                project.save()
+            except:
+                return JsonResponse({
+                    "error": "There was an error editing this project"
+                })
+            return JsonResponse({
+                "message": "ProjectEdited"
+            })
+        else:
+            return JsonResponse({
+                "error": "Put needed"
+            })
+    else:
+        return JsonResponse({
+            "error": "Login needed"
+        })
+
+
+# Delete Project
+@ensure_csrf_cookie
+def delete_project(request):
+
+    # Ensure user is logged in
+    if request.user.is_authenticated:
+
+        # Ensure the method is DELETE
+        if request.method == 'DELETE':
+
+            # Get all data
+            data = json.loads(request.body)
+            project_id = data.get('project_id')
+            project = Project.objects.get(id=project_id)
+
+            # Try to delete project
+            try:
+                project.delete()
+            except:
+                return JsonResponse({
+                    "error": "There was an error deleting this project"
+                })
+            return JsonResponse({
+                "message": "ProjectDeleted"
             })
         else:
             return JsonResponse({

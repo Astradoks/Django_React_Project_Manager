@@ -19,7 +19,11 @@ urlpatterns = [
     # Edit routes
     path("change_task_column", views.change_task_column, name="change_task_column"),
     path("edit_task", views.edit_task, name="edit_task"),
+    path("edit_column", views.edit_column, name="edit_column"),
+    path("edit_project", views.edit_project, name="edit_project"),
 
     # Delete routes
-    path("delete_task", views.delete_task, name="delete_task")
+    path("delete_task", views.delete_task, name="delete_task"),
+    path("delete_column", views.delete_column, name="delete_column"),
+    path("delete_project", views.delete_project, name="delete_project")
 ]
