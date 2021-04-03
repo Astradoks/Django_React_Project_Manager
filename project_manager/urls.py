@@ -8,7 +8,7 @@ urlpatterns = [
     path("register", views.register, name="register"),
     
     # Get routes
-    path("projects", views.projects, name="projects"),
+    path("projects/<str:category>", views.projects, name="projects"),
     path("project/<int:id>", views.project, name="project"),
 
     # Create routes

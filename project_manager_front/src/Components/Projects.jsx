@@ -42,7 +42,23 @@ export default function Projects(props){
     return (
         <div>
             <h1>Projects</h1>
-            <br/><br/>
+            <br/>
+            <div className="row container">
+                <h5>Select a Category</h5>
+                <div className="col-md-3 d-grid gap-2 mb-2">
+                    <button className="btn btn-outline-primary" onClick={() => {
+                        props.setCategoryFilter('all');
+                    }}>All</button>
+                </div>
+                {props.categories.map(category => (
+                    <div key={category} className="col-md-3 d-grid gap-2 mb-2">
+                        <button className="btn btn-outline-primary" onClick={() => {
+                            props.setCategoryFilter(category);
+                        }}>{category}</button>
+                    </div>
+                ))}
+            </div>
+            <br/>
             <div className="row">
                 {/* Map all the projects from this user and render them */}
                 {props.projects.map(project => (

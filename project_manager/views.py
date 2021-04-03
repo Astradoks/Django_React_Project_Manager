@@ -75,8 +75,11 @@ def register(request):
 
 
 # Return all projects from the user that is logged in
-def projects(request):
-    projects = request.user.projects.all()
+def projects(request, category):
+    if category == 'all':
+        projects = request.user.projects.all()
+    else:
+        projects = request.user.projects.filter(category=category)
     return JsonResponse([project.serialize() for project in projects], safe=False)
 
 

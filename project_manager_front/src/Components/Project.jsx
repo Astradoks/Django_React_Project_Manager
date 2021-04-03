@@ -276,6 +276,7 @@ export default function Project(props){
         e.preventDefault();
         const data = await delete_project(projectId);
         window.location.reload();
+        console.log(data);
     }
 
     return (

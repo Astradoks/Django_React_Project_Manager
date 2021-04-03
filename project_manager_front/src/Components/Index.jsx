@@ -10,6 +10,9 @@ export default function Index(){
     const [projects, setProjects] = useState([]);
     const [page, setPage] = useState();
     const [projectId, setProjectId] = useState();
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [lastCategoryFilter, setLastCategoryFilter] = useState('all');
+    const [categories, setCategories] = useState();
 
     // Function to logout the user and remove the item from session storage so that the projectManager component knows if the user has logged out
     async function logout() {
@@ -22,10 +25,28 @@ export default function Index(){
 
     // Function to get all projects and set them in projects const, also set page in projects so projects can be rendered
     async function get_projects() {
-        const response = await fetch('/projects');
+        const response = await fetch(`/projects/${categoryFilter}`);
         const data = await response.json();
         setProjects(data);
+    }
+
+    async function get_categories() {
+        const response = await fetch('projects/all');
+        const data = await response.json();
+        let categories = data.map(project => project.category);
+        categories = [...new Set(categories)];
+        setCategories(categories);
         setPage('projects');
+    }
+
+    function reload() {
+        get_categories();
+        get_projects();
+    }
+
+    if (lastCategoryFilter !== categoryFilter) {
+        reload();
+        setLastCategoryFilter(categoryFilter);
     }
 
     return (
@@ -42,7 +63,7 @@ export default function Index(){
                                 <Link className="nav-link active" to="/" onClick={() => {setPage('home')}}>Home</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link active" to="/" onClick={() => get_projects()}>Projects</Link>
+                                <Link className="nav-link active" to="/" onClick={() => reload()}>Projects</Link>
                             </li>
                             <li className="nav-item">
                                 <Link className="nav-link active" to="/login" onClick={() => logout()}>Logout</Link>
@@ -57,7 +78,7 @@ export default function Index(){
                 {(() => {
                     switch (page) {
                     case "home":     return <Home />;
-                    case "projects": return <Projects projects={projects} setPage={setPage} setProjectId={setProjectId} />;
+                    case "projects": return <Projects projects={projects} setPage={setPage} setProjectId={setProjectId} setCategoryFilter={setCategoryFilter} categories={categories} reload={reload} />;
                     case "project" : return <Project id={projectId} setPage={setPage}/>
                     default:         return <Home />;
                     }
