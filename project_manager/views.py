@@ -3,12 +3,12 @@ import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import JsonResponse
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 
 from .models import Column, Project, Task, User
 
 # Create your views here.
-
+#@csrf_exempt
 @ensure_csrf_cookie
 def login_view(request):
     if request.method == "POST":
@@ -42,6 +42,7 @@ def logout_view(request):
     })
 
 
+#@csrf_exempt
 @ensure_csrf_cookie
 def register(request):
     if request.method == "POST":
@@ -84,6 +85,7 @@ def projects(request, category):
 
 
 # Create a project for the user that is logged in
+#@csrf_exempt
 @ensure_csrf_cookie
 def create_project(request):
 
@@ -139,6 +141,7 @@ def project(request, id):
 
 
 # Create a new column in a project
+#@csrf_exempt
 @ensure_csrf_cookie
 def create_column(request):
 
@@ -176,6 +179,7 @@ def create_column(request):
 
 
 # Create new task in a column
+#@csrf_exempt
 @ensure_csrf_cookie
 def create_task(request):
 
@@ -215,6 +219,7 @@ def create_task(request):
 
 
 # Change task to another column
+#@csrf_exempt
 @ensure_csrf_cookie
 def change_task_column(request):
 
@@ -253,6 +258,7 @@ def change_task_column(request):
 
 
 # Edit Task
+#@csrf_exempt
 @ensure_csrf_cookie
 def edit_task(request):
 
@@ -294,6 +300,7 @@ def edit_task(request):
 
 
 # Delete Task
+#@csrf_exempt
 @ensure_csrf_cookie
 def delete_task(request):
 
@@ -329,6 +336,7 @@ def delete_task(request):
 
 
 # Edit Column
+#@csrf_exempt
 @ensure_csrf_cookie
 def edit_column(request):
 
@@ -366,6 +374,7 @@ def edit_column(request):
 
 
 # Delete Column
+#@csrf_exempt
 @ensure_csrf_cookie
 def delete_column(request):
 
@@ -401,6 +410,7 @@ def delete_column(request):
 
 
 # Edit Project
+#@csrf_exempt
 @ensure_csrf_cookie
 def edit_project(request):
 
@@ -442,6 +452,7 @@ def edit_project(request):
 
 
 # Delete Project
+#@csrf_exempt
 @ensure_csrf_cookie
 def delete_project(request):
 
