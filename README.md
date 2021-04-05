@@ -9,10 +9,13 @@ To start this project it is necessary to have Python, Django and Node installed.
 After cloning this project you need to excecute the following commands in the main directory to create the database:
 * `python3 manage.py makemigrations`
 * `python3 manage.py migrate`
+
 After this, you have to excecute the next command in the same directory to start Django server:
 * `python3 manage.py runserver`
+
 Then it is needed to install all the dependencies of the react project. To do this you need to excecute the following command in the project_manager_front directory:
 * `npm i`
+
 After all the dependencies have been installed you have to excecute the following command to start the React server:
 * `npm start`
 
