@@ -415,11 +415,13 @@ def edit_project(request):
             project_id = data.get('project_id')
             project = Project.objects.get(id=project_id)
             new_name = data.get('new_name')
+            new_category = data.get('new_category')
             new_description = data.get('new_description')
 
             # Try to edit project
             try:
                 project.name = new_name
+                project.category = new_category
                 project.description = new_description
                 project.save()
             except:

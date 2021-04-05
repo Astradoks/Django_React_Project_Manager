@@ -112,7 +112,7 @@ async function delete_column(column_id) {
 }
 
 // Fetch edit project
-async function edit_project(project_id, new_name, new_description) {
+async function edit_project(project_id, new_name, new_category, new_description) {
     return fetch('/edit_project', {
         method: 'PUT',
         headers: {
@@ -121,6 +121,7 @@ async function edit_project(project_id, new_name, new_description) {
         body: JSON.stringify({
             project_id: project_id,
             new_name: new_name,
+            new_category: new_category,
             new_description: new_description
         })
       })
@@ -146,6 +147,7 @@ export default function Project(props){
     // Display project information
     const [projectId, setProjectId] = useState();
     const [projectName, setProjectName] = useState();
+    const [projectCategory, setProjectCategory] = useState();
     const [projectDescription, setProjectDescription] = useState();
     const [projectColumns, setProjectColumns] = useState([]);
     // Render form, render number of columns, and create a new column
@@ -175,6 +177,7 @@ export default function Project(props){
     const [editProjectForm, setEditProjectForm] = useState();
     // New values to edit project
     const [newProjectName, setNewProjectName] = useState();
+    const [newProjectCategory, setNewProjectCategory] = useState();
     const [newProjectDescription, setNewProjectDescription] = useState();
     // Delete tasks, columns or projects
     const [checked, setChecked] = useState(false);
@@ -190,6 +193,7 @@ export default function Project(props){
         const data = await response.json();
         setProjectId(data.project.id);
         setProjectName(data.project.name);
+        setProjectCategory(data.project.category);
         setProjectDescription(data.project.description);
         setProjectColumns(data.columns);
         // Change layout depending on number of columns
@@ -267,7 +271,7 @@ export default function Project(props){
     // Edit Project
     const handleEditProject = async e => {
         e.preventDefault();
-        const data = await edit_project(projectId, newProjectName, newProjectDescription);
+        const data = await edit_project(projectId, newProjectName, newProjectCategory, newProjectDescription);
         reload(data);
     }
 
@@ -293,6 +297,7 @@ export default function Project(props){
                         <div className="row">
                             <div className="col-lg-3">
                                 <input type="text" className="form-control mb-2" required value={newProjectName} onChange={e => setNewProjectName(e.target.value)} />
+                                <input type="text" className="form-control mb-2" required value={newProjectCategory} onChange={e => setNewProjectCategory(e.target.value)} />
                             </div>
                             <div className="col-lg-6">
                                 <textarea rows="4" className="form-control mb-2" required value={newProjectDescription} onChange={e => setNewProjectDescription(e.target.value)}></textarea>
@@ -328,6 +333,7 @@ export default function Project(props){
                 // Show forms to edit and delete project on mouse enter
                 <div onMouseEnter={() => {
                     setNewProjectName(projectName);
+                    setNewProjectCategory(projectCategory);
                     setNewProjectDescription(projectDescription);
                     setEditProjectForm(true);
                     }} >
@@ -406,7 +412,7 @@ export default function Project(props){
                                                 <br/>
                                                 <textarea rows="5" className="form-control" required value={newTaskDescription} onChange={e => setNewTaskDescription(e.target.value)}></textarea>
                                                 <br/>
-                                                <select className="form-select" required onChange={e => setNewTaskColor(e.target.value)}>
+                                                <select className="form-select" onChange={e => setNewTaskColor(e.target.value)}>
                                                     <option>Select new color</option>
                                                     <option value="primary" className="bg-primary text-white">Blue</option>
                                                     <option value="secondary" className="bg-secondary text-white">Grey</option>
